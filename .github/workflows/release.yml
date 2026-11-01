@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check that the tag matches VERSION
+        run: test "v$(cat VERSION)" = "${GITHUB_REF_NAME}"
+
+      - name: Check translations
+        run: python3 Scripts/check_localization.py
+
+      - name: Build and package
+        run: ./build.sh && Scripts/package.sh
+
+      - name: Release notes from CHANGELOG.md
+        run: |
+          version="$(cat VERSION)"
+          awk -v v="$version" '
+            $0 ~ "^## \\[" v "\\]" { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          {
+            echo
+            echo "### Install"
+            echo
+            echo "Download \`SMC-Fan-$version.zip\`, unzip it and move **SMC Fan.app** to Applications."
+            echo "The app is not notarized: on first launch use **System Settings → Privacy & Security → Open Anyway**,"
+            echo "or run \`xattr -dr com.apple.quarantine \"/Applications/SMC Fan.app\"\`. Then click **Install** in the dashboard."
+            echo
+            echo "**SHA-256:** \`$(cut -d' ' -f1 dist/SMC-Fan-$version.zip.sha256)\`"
+          } >> notes.md
+          cat notes.md
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "SMC Fan $(cat VERSION)" \
+            --notes-file notes.md

@@ -1,0 +1,21 @@
+name: Feature request
+description: Suggest an idea for SMC Fan
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like to do?
+      description: Describe the problem or use case, not just the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How could SMC Fan help?
+  - type: checkboxes
+    id: light
+    attributes:
+      label: Lightweight
+      options:
+        - label: I understand SMC Fan aims to stay very light; this idea shouldn't cost noticeable CPU or memory when idle.

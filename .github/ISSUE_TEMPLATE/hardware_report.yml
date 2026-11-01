@@ -1,0 +1,62 @@
+name: Hardware report
+description: Tell us whether SMC Fan works on your Mac
+labels: [hardware]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! Reports from Macs other than the 14" M5 Max help add support for them.
+        If you haven't installed the service, use `build/smcfan` from a source build instead of the path below.
+  - type: input
+    id: model
+    attributes:
+      label: Mac model and chip
+      description: "Output of: sysctl -n hw.model machdep.cpu.brand_string"
+      placeholder: Mac15,8 Apple M3 Max
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      description: "Output of: sw_vers -productVersion"
+    validations:
+      required: true
+  - type: dropdown
+    id: works
+    attributes:
+      label: Does fan control work?
+      description: Pick Maximum in the dashboard; the fans should spin up within a few seconds.
+      options:
+        - "Yes, fans respond to the profiles"
+        - "Partly (describe below)"
+        - "No, fans don't change"
+        - "My Mac has no fans"
+    validations:
+      required: true
+  - type: textarea
+    id: status
+    attributes:
+      label: Status
+      description: "Output of: /Library/PrivilegedHelperTools/smcfand status"
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: fankeys
+    attributes:
+      label: Fan keys
+      description: "Output of: /Library/PrivilegedHelperTools/smcfand keys F"
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Service log
+      description: "Output of: tail -30 /var/log/smcfan.log"
+      render: text
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?

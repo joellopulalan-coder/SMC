@@ -1,0 +1,2 @@
+/* English is the source language: every key in the code is already its English text.
+   This file exists so macOS knows the app is localized in English. */

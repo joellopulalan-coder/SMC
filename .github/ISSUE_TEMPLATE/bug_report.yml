@@ -1,0 +1,45 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Mac model
+      description: "Output of: sysctl -n hw.model machdep.cpu.brand_string"
+      placeholder: Mac17,7 Apple M5 Max
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      description: "Output of: sw_vers -productVersion"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: SMC Fan version
+      description: "Shown in Finder (Get Info) or: /Library/PrivilegedHelperTools/smcfand version"
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Service log
+      description: "Output of: tail -50 /var/log/smcfan.log"
+      render: text
+  - type: textarea
+    id: status
+    attributes:
+      label: Status
+      description: "Output of: /Library/PrivilegedHelperTools/smcfand status"
+      render: text
