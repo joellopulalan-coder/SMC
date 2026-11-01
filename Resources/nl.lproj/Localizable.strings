@@ -80,7 +80,6 @@
 "Until stopped" = "Tot ik stop";
 "CPU + GPU" = "CPU + GPU";
 "Fully loads the CPU and/or GPU and measures how much performance your Mac loses to heat. Run the same test with different fan profiles to compare them." = "Belast CPU en/of GPU volledig en meet hoeveel prestatie je Mac door hitte verliest. Draai dezelfde test met verschillende fanprofielen om ze te vergelijken.";
-"Load" = "Belasting";
 "Duration" = "Duur";
 "Start test" = "Start test";
 "GPU test unavailable (Metal couldn't start)." = "GPU-test niet beschikbaar (Metal kon niet starten).";

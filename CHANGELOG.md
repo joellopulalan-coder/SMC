@@ -4,6 +4,12 @@ All notable changes to SMC Fan are listed here. The format follows [Keep a Chang
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-01
+
+### Fixed
+
+- The CPU / GPU / CPU + GPU selector in the stress test no longer jumps out of its frame while a test runs. The segments now always have equal widths.
+
 ## [1.0.0] - 2026-11-01
 
 The first public release.
@@ -26,5 +32,6 @@ The first public release.
 
 - About 1% CPU and 50 MB with only the menu bar visible; the background service uses about 0.2% CPU and under 2 MB.
 
-[Unreleased]: https://github.com/joellopulalan-coder/SMC/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/joellopulalan-coder/SMC/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/joellopulalan-coder/SMC/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/joellopulalan-coder/SMC/releases/tag/v1.0.0
