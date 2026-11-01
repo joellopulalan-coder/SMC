@@ -278,13 +278,10 @@ private struct StressSection: View {
                 .font(.callout).foregroundStyle(.secondary)
 
             HStack(spacing: 12) {
-                Picker(tr("Load"), selection: $stress.mode) {
-                    ForEach(StressMode.allCases) { Text($0.title).tag($0) }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .frame(width: 240)
-                .disabled(stress.running)
+                EqualSegmentedPicker(selection: $stress.mode,
+                                     options: StressMode.allCases.map { ($0, $0.title) },
+                                     enabled: !stress.running)
+                    .frame(width: 300)
 
                 Picker(tr("Duration"), selection: $stress.duration) {
                     ForEach(StressDuration.allCases) { Text($0.title).tag($0) }
@@ -355,6 +352,45 @@ private struct StressSection: View {
                              ?? tr("adapter keeps up"),
                          tint: monitor.overdraw == nil ? .primary : .orange)
             }
+        }
+    }
+}
+
+/// A native segmented control whose segments always have equal widths.
+/// SwiftUI's segmented Picker switches between proportional and equal widths when its state
+/// changes (e.g. when disabled), so it jumped out of its frame while a stress test ran.
+private struct EqualSegmentedPicker<Value: Hashable>: NSViewRepresentable {
+    @Binding var selection: Value
+    let options: [(Value, String)]
+    let enabled: Bool
+
+    func makeNSView(context: Context) -> NSSegmentedControl {
+        let control = NSSegmentedControl(labels: options.map(\.1), trackingMode: .selectOne,
+                                         target: context.coordinator, action: #selector(Coordinator.changed(_:)))
+        control.segmentDistribution = .fillEqually
+        control.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        return control
+    }
+
+    func updateNSView(_ control: NSSegmentedControl, context: Context) {
+        context.coordinator.parent = self
+        for (i, option) in options.enumerated() where control.label(forSegment: i) != option.1 {
+            control.setLabel(option.1, forSegment: i)
+        }
+        control.selectedSegment = options.firstIndex { $0.0 == selection } ?? -1
+        control.isEnabled = enabled
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    final class Coordinator: NSObject {
+        var parent: EqualSegmentedPicker
+
+        init(_ parent: EqualSegmentedPicker) { self.parent = parent }
+
+        @objc func changed(_ sender: NSSegmentedControl) {
+            guard parent.options.indices.contains(sender.selectedSegment) else { return }
+            parent.selection = parent.options[sender.selectedSegment].0
         }
     }
 }
