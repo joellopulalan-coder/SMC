@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # build.sh derives the build number from the commit count
+
+      - name: Check translations
+        run: python3 Scripts/check_localization.py
+
+      - name: Build
+        run: ./build.sh
+
+      - name: Smoke test the command-line tool
+        run: build/smcfan version
+
+      - name: Package
+        run: Scripts/package.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SMC-Fan-${{ github.sha }}
+          path: dist/*

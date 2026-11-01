@@ -1,0 +1,117 @@
+/* Dutch translation of SMC Fan. Keys are the English source text.
+   Run `python3 Scripts/check_localization.py` after changing strings in the app. */
+
+/* Menu bar */
+"Temperature" = "Temperatuur";
+"Fan speed" = "Fansnelheid";
+"Profile (as icon)" = "Profiel (als icoon)";
+"Power draw" = "Stroomverbruik";
+"Charging / discharging" = "Laden / ontladen";
+"Battery percentage" = "Batterijpercentage";
+"replaces the fan icon" = "vervangt het fan-icoon";
+"+12 W, −8 W or AC" = "+12 W, −8 W of AC";
+"Fan %@" = "Fan %@";
+"Stress test %@" = "Stresstest %@";
+"Stop" = "Stop";
+"Profile" = "Profiel";
+"Install the background service to control the fans." = "Installeer de achtergronddienst om de fans aan te sturen.";
+"Open dashboard" = "Dashboard openen";
+"Quit" = "Stoppen";
+"Quits the app. The background service keeps controlling the fans." = "Sluit de app. De achtergronddienst blijft de fans regelen.";
+"charging %@" = "laadt %@";
+"discharging %@" = "ontlaadt %@";
+"on adapter" = "op adapter";
+"System" = "Systeem";
+"Adapter" = "Adapter";
+"max %@" = "max %@";
+"Battery" = "Batterij";
+"Adapter can't keep up" = "Adapter levert te weinig";
+"The battery adds %@ on top of the %@ adapter." = "De batterij vult %1$@ aan bovenop de %2$@-adapter.";
+"The battery adds %@." = "De batterij vult %@ aan.";
+
+/* Profiles */
+"Balanced" = "Gebalanceerd";
+"Performance" = "Prestatie";
+"Maximum" = "Maximaal";
+"Custom" = "Aangepast";
+"Apple controls the fans. Quiet, but the chip is allowed to run hot." = "Apple regelt de fans zelf. Stil, maar de chip mag warm worden.";
+"Quiet during light work; ramps up from 65 °C, full speed at 85 °C." = "Stil bij licht werk; vanaf 65 °C geleidelijk harder, vol bij 85 °C.";
+"Steps in at 55 °C and cools aggressively. Less throttling, more noise." = "Grijpt al bij 55 °C in en koelt agressief. Minder throttling, meer geluid.";
+"Both fans at maximum speed, all the time." = "Beide fans continu op maximale snelheid.";
+"Your own takeover threshold and curve." = "Je eigen overnamedrempel en curve.";
+"Couldn't save the profile. Is the background service installed?" = "Kon het profiel niet opslaan. Is de achtergronddienst geïnstalleerd?";
+
+/* Background service */
+"Background service not installed" = "Achtergronddienst niet geïnstalleerd";
+"Update available for the background service" = "Update beschikbaar voor de achtergronddienst";
+"Background service stopped" = "Achtergronddienst gestopt";
+"Background service running" = "Achtergronddienst actief";
+"Installation files are missing from the app." = "Installatiebestanden ontbreken in de app.";
+"Couldn't change open at login: %@" = "Openen bij inloggen aanpassen lukte niet: %@";
+"Unknown error" = "Onbekende fout";
+"Background service" = "Achtergronddienst";
+"The service is still running, but this app has a newer version. Updating asks for your password." = "De dienst draait nog, maar deze app heeft een nieuwere versie. Bijwerken vraagt je wachtwoord.";
+"Without the background service, SMC Fan can only watch, not control the fans." = "Zonder de achtergronddienst kan SMC Fan alleen meekijken, niet de fans aansturen.";
+"Update" = "Bijwerken";
+"Install" = "Installeren";
+"Remove" = "Verwijderen";
+"Restart" = "Opnieuw starten";
+"The service runs as root in the background, also when this app is closed, and starts automatically at boot. When it stops or is removed, the fans go back to macOS." = "De dienst draait als root op de achtergrond, ook als deze app dicht is, en start vanzelf bij het opstarten. Bij stoppen of verwijderen gaan de fans terug naar macOS.";
+"Open SMC Fan at login" = "SMC Fan openen bij inloggen";
+
+/* Dashboard */
+"Power" = "Stroom";
+"Stress test" = "Stresstest";
+"Menu bar" = "Menubalk";
+"average %@" = "gemiddeld %@";
+"macOS in control" = "macOS regelt";
+"takeover %@" = "overname %@";
+"total power draw" = "totaal verbruik";
+"%@ adapter" = "%@-adapter";
+"not connected" = "niet aangesloten";
+"charging at %@" = "laadt met %@";
+"on adapter, not charging" = "op adapter, laadt niet";
+"on battery" = "op batterij";
+
+/* Stress test */
+"1 min" = "1 min";
+"3 min" = "3 min";
+"10 min" = "10 min";
+"Until stopped" = "Tot ik stop";
+"CPU + GPU" = "CPU + GPU";
+"Fully loads the CPU and/or GPU and measures how much performance your Mac loses to heat. Run the same test with different fan profiles to compare them." = "Belast CPU en/of GPU volledig en meet hoeveel prestatie je Mac door hitte verliest. Draai dezelfde test met verschillende fanprofielen om ze te vergelijken.";
+"Load" = "Belasting";
+"Duration" = "Duur";
+"Start test" = "Start test";
+"GPU test unavailable (Metal couldn't start)." = "GPU-test niet beschikbaar (Metal kon niet starten).";
+"%@ — %@ left" = "%1$@ — nog %2$@";
+"Running for %@" = "Loopt %@";
+"CPU score" = "CPU-score";
+"GPU score" = "GPU-score";
+"%@ cores at full load" = "%@ cores vol";
+"Hottest sensor" = "Heetste sensor";
+"fans %@" = "fans %@";
+"battery adds %@" = "batterij vult %@ aan";
+"adapter keeps up" = "adapter houdt het bij";
+"Results" = "Resultaten";
+"Clear" = "Wissen";
+"When" = "Wanneer";
+"Test" = "Test";
+"Max" = "Max";
+"Avg." = "Gem.";
+"Shortfall" = "Tekort";
+"Score = average over the first seconds. The percentage is how much lower the score was at the end (thermal throttling)." = "Score = gemiddelde in de eerste seconden. Het percentage is hoeveel lager de score aan het eind was (thermal throttling).";
+
+/* Menu bar settings */
+"Choose what appears next to the icon in the menu bar." = "Kies wat er naast het icoon in de menubalk staat.";
+"Warn when the adapter can't keep up" = "Waarschuwen als de adapter te weinig levert";
+"Warning icon plus the shortfall, e.g. −8 W, as soon as the battery helps out while plugged in" = "Waarschuwingsicoon en het tekort, bijv. −8 W, zodra de batterij bijspringt terwijl de stekker erin zit";
+
+/* Fan curve */
+"now %@" = "nu %@";
+"temperature (°C)" = "temperatuur (°C)";
+"fan %" = "fan %";
+"macOS controls the fans" = "macOS regelt de fans";
+"Take over from" = "Overname vanaf";
+"back to macOS below %@" = "terug naar macOS onder %@";
+"Point %@" = "Punt %@";
