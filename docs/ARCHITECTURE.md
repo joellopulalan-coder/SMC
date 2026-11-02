@@ -75,6 +75,7 @@ The app writes it atomically (write to a temporary file, then rename), so the da
 | `SMCFanApp.swift` | App entry, the dashboard `Window` and the `MenuBarExtra`, the menu bar label, formatting helpers |
 | `SensorMonitor.swift` | Reads SMC sensors and battery data on a background queue and publishes one snapshot per cycle |
 | `SettingsStore.swift` | Profiles, curves, and writing the config file |
+| `CoreLoad.swift` | CPU topology (core types and clusters), per-core load and GPU utilization |
 | `HelperManager.swift` | Installs/updates/removes the daemon and detects whether it runs (by testing its lock) |
 | `StressTest.swift` | CPU and GPU load, scores, results |
 | `DashboardView.swift` | The dashboard |
@@ -95,6 +96,20 @@ A menu bar utility runs all day, so every idle cycle counts:
 - **The menu bar item only redraws when its text changes.** The label content is `Equatable`; every redraw makes macOS re-render the status item as a bitmap for every display.
 - **Battery data is read key by key** with `IORegistryEntryCreateCFProperty` instead of copying the battery's whole property dictionary.
 - **Metal is loaded only during a GPU test** and released afterwards.
+
+### Core layout and load
+
+Apple Silicon chips mix core types, and the mix differs per generation: M1–M4 have Performance and Efficiency cores, the M5 has Super and Performance cores, and Ultra chips have more clusters of each. `CPUTopology.read()` works it out at launch without hard-coding chips:
+
+1. **Core types** come from `sysctl`: `hw.nperflevels`, and per level `hw.perflevelN.name` (for example "Super"), `.logicalcpu` and `.cpusperl2`. Level 0 is the fastest.
+2. **Which core is which** comes from the device tree (`IODeviceTree:/cpus/cpuN`): every CPU has a `logical-cpu-id`, a `logical-cluster-id` and a `cluster-type` letter — `P` for the fastest cluster type, `M` for the middle one on the M5, `E` for efficiency. Ranked P → M → E, the letters line up with the perflevels; the counts are checked to match.
+3. **Fallback**: if the device tree can't be read or doesn't match, cores are assigned by number — macOS numbers the slowest cores first — and split into clusters of `cpusperl2`.
+
+On the 14" M5 Max this yields 6 Super cores (cpu12–17, cluster type `P`) and 12 Performance cores in two clusters (cpu0–11, type `M`).
+
+**Per-core load** comes from `host_processor_info(PROCESSOR_CPU_LOAD_INFO)`: one Mach call returns user/system/idle/nice tick counters for every logical CPU, and load is the non-idle share of the ticks since the previous reading. The processor index equals the `logical-cpu-id`. **GPU utilization** is `Device Utilization %` from the `IOAccelerator` service's `PerformanceStatistics`; the core count is its `gpu-core-count` property.
+
+Both are read on the sensor queue in the same cycle as the temperatures, so they add no timers or wake-ups.
 
 ### Stress test
 

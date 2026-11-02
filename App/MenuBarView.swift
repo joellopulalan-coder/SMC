@@ -34,6 +34,9 @@ struct MenuBarView: View {
                 }
             }
 
+            CoreStrip(topology: monitor.topology, loads: monitor.coreLoads, gpuLoad: monitor.gpuLoad,
+                      cpuLoad: monitor.cpuLoad)
+
             if stress.running {
                 HStack(spacing: 8) {
                     Image(systemName: "flame.fill").foregroundStyle(.red)
@@ -122,6 +125,46 @@ private struct MiniTemp: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(10)
         .background(Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+/// Compact per-core load: one thin bar per core, colored by core type, plus the GPU.
+private struct CoreStrip: View {
+    let topology: CPUTopology
+    let loads: [Double]
+    let gpuLoad: Double?
+    let cpuLoad: Double
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(verbatim: "CPU \(Int((cpuLoad * 100).rounded()))%")
+                Spacer()
+                if let gpuLoad { Text(verbatim: "GPU \(Int((gpuLoad * 100).rounded()))%") }
+            }
+            .font(.caption).foregroundStyle(.secondary).monospacedDigit()
+            HStack(alignment: .bottom, spacing: 6) {
+                ForEach(topology.types) { type in
+                    HStack(alignment: .bottom, spacing: 1.5) {
+                        ForEach(type.cores, id: \.self) { cpu in
+                            bar(loads.indices.contains(cpu) ? loads[cpu] : 0, type.color)
+                        }
+                    }
+                }
+                if let gpuLoad {
+                    bar(gpuLoad, .purple).frame(width: 14)
+                }
+            }
+            .frame(height: 18)
+        }
+    }
+
+    private func bar(_ load: Double, _ color: Color) -> some View {
+        ZStack(alignment: .bottom) {
+            RoundedRectangle(cornerRadius: 1.5).fill(color.opacity(0.18))
+            RoundedRectangle(cornerRadius: 1.5).fill(color).frame(height: 18 * load)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 

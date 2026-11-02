@@ -106,6 +106,17 @@
 "Warn when the adapter can't keep up" = "Waarschuwen als de adapter te weinig levert";
 "Warning icon plus the shortfall, e.g. −8 W, as soon as the battery helps out while plugged in" = "Waarschuwingsicoon en het tekort, bijv. −8 W, zodra de batterij bijspringt terwijl de stekker erin zit";
 
+/* Load */
+"Load" = "Belasting";
+"Super cores" = "Superkernen";
+"Performance cores" = "Prestatiekernen";
+"Efficiency cores" = "Efficiëntiekernen";
+"%@ cores" = "%@ kernen";
+"%@ CPU cores" = "%@ CPU-kernen";
+"%@-core GPU" = "%@-kern GPU";
+"CPU load" = "CPU-belasting";
+"GPU load" = "GPU-belasting";
+
 /* Fan curve */
 "now %@" = "nu %@";
 "temperature (°C)" = "temperatuur (°C)";

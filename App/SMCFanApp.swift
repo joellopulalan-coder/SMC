@@ -55,7 +55,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 enum MenuBarItem: String, CaseIterable, Identifiable {
-    case temperature, fanSpeed, profile, systemPower, batteryPower, batteryPercent
+    case temperature, fanSpeed, cpuLoad, gpuLoad, profile, systemPower, batteryPower, batteryPercent
 
     static let storageKey = "menuBarItems"
     static let defaultRaw = "temperature"
@@ -67,6 +67,8 @@ enum MenuBarItem: String, CaseIterable, Identifiable {
         switch self {
         case .temperature: tr("Temperature")
         case .fanSpeed: tr("Fan speed")
+        case .cpuLoad: tr("CPU load")
+        case .gpuLoad: tr("GPU load")
         case .profile: tr("Profile (as icon)")
         case .systemPower: tr("Power draw")
         case .batteryPower: tr("Charging / discharging")
@@ -78,6 +80,8 @@ enum MenuBarItem: String, CaseIterable, Identifiable {
         switch self {
         case .temperature: "64°"
         case .fanSpeed: formatRPM(2400)
+        case .cpuLoad: "CPU 23%"
+        case .gpuLoad: "GPU 41%"
         case .profile: tr("replaces the fan icon")
         case .systemPower: "19 W"
         case .batteryPower: tr("+12 W, −8 W or AC")
@@ -144,6 +148,8 @@ struct MenuBarLabel: View {
         if let d = overdraw, !items.contains(.batteryPower) { parts.append("−" + formatWatts(d)) }
         if items.contains(.temperature) { parts.append("\(Int(monitor.hottest.rounded()))°") }
         if items.contains(.fanSpeed) { parts.append(formatRPM(monitor.averageRPM)) }
+        if items.contains(.cpuLoad) { parts.append("CPU \(Int((monitor.cpuLoad * 100).rounded()))%") }
+        if items.contains(.gpuLoad), let g = monitor.gpuLoad { parts.append("GPU \(Int((g * 100).rounded()))%") }
         if items.contains(.systemPower), let w = p.system { parts.append(formatWatts(w)) }
         if items.contains(.batteryPower), let flow = formatBatteryFlow(p) { parts.append(flow) }
         if items.contains(.batteryPercent), let pct = p.batteryPercent { parts.append("\(pct)%") }

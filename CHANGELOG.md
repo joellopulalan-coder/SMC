@@ -4,6 +4,15 @@ All notable changes to SMC Fan are listed here. The format follows [Keep a Chang
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-02
+
+### Added
+
+- Per-core load in the dashboard: one bar per CPU core, grouped by core type (Super, Performance, Efficiency — whatever the chip has) and cluster, plus GPU utilization and a load-history chart.
+- The core layout is read from macOS (`hw.perflevelN` and the device tree), so it works on every M-series chip without hard-coding.
+- A per-core load strip in the menu bar panel.
+- CPU load and GPU load as menu bar readouts.
+
 ## [1.0.1] - 2026-11-01
 
 ### Fixed
@@ -32,6 +41,7 @@ The first public release.
 
 - About 1% CPU and 50 MB with only the menu bar visible; the background service uses about 0.2% CPU and under 2 MB.
 
-[Unreleased]: https://github.com/joellopulalan-coder/SMC/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/joellopulalan-coder/SMC/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/joellopulalan-coder/SMC/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/joellopulalan-coder/SMC/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/joellopulalan-coder/SMC/releases/tag/v1.0.0

@@ -27,6 +27,9 @@ struct DashboardView: View {
                     ServiceBanner()
                 }
 
+                Panel(tr("Load"), symbol: "cpu") {
+                    CoreLoadSection()
+                }
                 Panel(tr("Temperature"), symbol: "thermometer.medium") {
                     TemperatureChart()
                 }
@@ -226,6 +229,119 @@ private struct FanChart: View {
         .chartYScale(domain: 0...max(maxRPM, 1000))
         .chartYAxisLabel("rpm")
         .frame(height: 130)
+    }
+}
+
+private struct CoreLoadSection: View {
+    @EnvironmentObject private var monitor: SensorMonitor
+
+    var body: some View {
+        let topology = monitor.topology
+        VStack(alignment: .leading, spacing: 14) {
+            Text(summary(topology)).font(.callout).foregroundStyle(.secondary)
+
+            ForEach(topology.types) { type in
+                CoreTypeRow(type: type, loads: monitor.coreLoads, average: monitor.load(of: type))
+            }
+            if let gpu = monitor.gpuLoad {
+                GPULoadRow(load: gpu, cores: topology.gpuCores)
+            }
+
+            Chart {
+                ForEach(monitor.history) { s in
+                    ForEach(topology.types) { type in
+                        if s.typeLoads.indices.contains(type.id) {
+                            LineMark(x: .value("Time", s.date), y: .value("%", s.typeLoads[type.id] * 100))
+                                .foregroundStyle(by: .value("Type", type.title))
+                        }
+                    }
+                    if let gpu = s.gpuLoad {
+                        LineMark(x: .value("Time", s.date), y: .value("%", gpu * 100))
+                            .foregroundStyle(by: .value("Type", "GPU"))
+                    }
+                }
+            }
+            .chartForegroundStyleScale(domain: topology.types.map(\.title) + ["GPU"],
+                                       range: topology.types.map(\.color) + [Color.purple])
+            .chartYScale(domain: 0...100)
+            .chartYAxisLabel("%")
+            .frame(height: 120)
+        }
+    }
+
+    private func summary(_ t: CPUTopology) -> String {
+        var parts = [t.chip, tr("%@ CPU cores", "\(t.cpuCount)")]
+        if let gpu = t.gpuCores { parts.append(tr("%@-core GPU", "\(gpu)")) }
+        return parts.joined(separator: " · ")
+    }
+}
+
+private struct CoreTypeRow: View {
+    let type: CoreType
+    let loads: [Double]
+    let average: Double
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Circle().fill(type.color).frame(width: 8, height: 8)
+                Text(type.title).font(.subheadline.weight(.semibold))
+                Text(tr("%@ cores", "\(type.cores.count)")).font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                Text(verbatim: "\(Int((average * 100).rounded()))%").font(.subheadline).monospacedDigit()
+            }
+            // One bar per core; a wider gap separates clusters.
+            HStack(spacing: 10) {
+                ForEach(type.clusters.indices, id: \.self) { i in
+                    HStack(spacing: 3) {
+                        ForEach(type.clusters[i], id: \.self) { cpu in
+                            CoreBar(load: loads.indices.contains(cpu) ? loads[cpu] : 0, color: type.color)
+                                .help("CPU \(cpu) · \(Int(((loads.indices.contains(cpu) ? loads[cpu] : 0) * 100).rounded()))%")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct CoreBar: View {
+    let load: Double
+    let color: Color
+    var height: CGFloat = 40
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            RoundedRectangle(cornerRadius: 3).fill(color.opacity(0.15))
+            RoundedRectangle(cornerRadius: 3).fill(color)
+                .frame(height: max(height * load, load > 0.005 ? 2 : 0))
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: height)
+    }
+}
+
+private struct GPULoadRow: View {
+    let load: Double
+    let cores: Int?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Circle().fill(Color.purple).frame(width: 8, height: 8)
+                Text(verbatim: "GPU").font(.subheadline.weight(.semibold))
+                if let cores { Text(tr("%@ cores", "\(cores)")).font(.caption).foregroundStyle(.secondary) }
+                Spacer()
+                Text(verbatim: "\(Int((load * 100).rounded()))%").font(.subheadline).monospacedDigit()
+            }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 3).fill(Color.purple.opacity(0.15))
+                    RoundedRectangle(cornerRadius: 3).fill(Color.purple).frame(width: geo.size.width * load)
+                }
+            }
+            .frame(height: 12)
+        }
     }
 }
 
