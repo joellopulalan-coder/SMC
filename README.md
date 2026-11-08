@@ -58,13 +58,14 @@ It was born out of a simple question — *"why pay $10 for a fan app when we can
 - **Survives sleep and restarts**: settings are re-applied every cycle, and the fans always go back to macOS when the service stops.
 
 **Monitoring**
+- **Per-core load**, grouped by core type and cluster — Super, Performance and Efficiency cores, whatever your chip has — plus GPU utilization and a load-history chart. The layout is read from macOS, so it fits every M-series chip from M1 to Ultra.
 - CPU and GPU temperatures (hottest and average across ~100 on-die sensors), both fans, and 5 minutes of history on charts.
 - **Power**: total system power, adapter input, adapter rating, battery percentage and charge/discharge rate.
 - **Adapter shortfall warning**: a ⚡︎⚠︎ icon plus the deficit (e.g. `−16 W`) in the menu bar when your Mac draws more than the adapter can deliver and the battery has to help out.
 
 **Menu bar**
-- Pick what's shown next to the icon: temperature, fan speed, profile icon, power draw, charging/discharging and battery percentage — for example `48° · 2.4k rpm · 15 W · AC`.
-- A compact panel with temperatures, fans, power and a one-click profile switcher.
+- Pick what's shown next to the icon: temperature, fan speed, CPU load, GPU load, profile icon, power draw, charging/discharging and battery percentage — for example `48° · 2.4k rpm · CPU 23% · 15 W · AC`.
+- A compact panel with temperatures, a per-core load strip, fans, power and a one-click profile switcher.
 
 **Stress test & benchmark**
 - Loads the CPU (all cores), the GPU (Metal compute) or both, for 1, 3 or 10 minutes or until you stop it.
@@ -138,6 +139,21 @@ Percentages are between the fan's minimum and maximum speed (on the M5 Max: 2,31
 While cooling down, the fans ramp from the first curve point back to their minimum speed between the takeover and release temperatures (the dashed line in the curve chart), and below the release temperature macOS takes over again.
 
 <p align="center"><img src="docs/images/profile.jpg" width="700" alt="Profile and curve editor"></p>
+
+### Load
+
+The **Load** block shows one bar per CPU core, grouped by core type and, within a type, by cluster. Hover over a bar to see the core number and its load. Below it is the GPU's utilization and a chart with the average load per core type over time.
+
+<p align="center"><img src="docs/images/load.jpg" width="760" alt="Per-core load"></p>
+
+Which core types you see depends on your chip:
+
+| Chip | Core types (fastest first) |
+|---|---|
+| M1 – M4 (Pro / Max / Ultra) | Performance · Efficiency |
+| M5 | Super · Performance (the 14" M5 Max: 6 Super + 12 Performance in two clusters, no Efficiency cores) |
+
+SMC Fan doesn't hard-code any of this: it reads the core types from macOS (`hw.perflevelN`) and maps each core to its type and cluster through the device tree, so new chips work without an update.
 
 ### Menu bar
 

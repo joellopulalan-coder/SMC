@@ -42,6 +42,8 @@ struct Sample: Identifiable {
     let gpu: Double
     let rpm: Double
     let power: Double
+    let typeLoads: [Double] // average load per core type, same order as CPUTopology.types
+    let gpuLoad: Double?
 }
 
 /// Reads only the few battery values we need, not the whole IORegistry dictionary.
@@ -138,12 +140,15 @@ final class SensorMonitor: ObservableObject {
         var power = PowerReading()
         /// Shortfall (W) once it occurs in two readings in a row; avoids flicker on short spikes.
         var overdraw: Double?
+        var coreLoads: [Double] = [] // per logical CPU, 0...1
+        var gpuLoad: Double?
     }
 
     // One published value per reading, so views redraw only once per round.
     @Published private(set) var ready = false
     @Published private(set) var current = Snapshot()
     @Published private(set) var history: [Sample] = []
+    @Published private(set) var topology = CPUTopology(chip: "", types: [], gpuCores: nil)
 
     var cpuAvg: Double { current.cpuAvg }
     var cpuMax: Double { current.cpuMax }
@@ -155,10 +160,22 @@ final class SensorMonitor: ObservableObject {
     var hottest: Double { max(cpuMax, gpuMax) }
     var anyManual: Bool { fans.contains { $0.manual } }
     var averageRPM: Double { fans.isEmpty ? 0 : fans.map(\.rpm).reduce(0, +) / Double(fans.count) }
+    var coreLoads: [Double] { current.coreLoads }
+    var gpuLoad: Double? { current.gpuLoad }
+    /// Average load of all CPU cores, 0...1.
+    var cpuLoad: Double { coreLoads.isEmpty ? 0 : coreLoads.reduce(0, +) / Double(coreLoads.count) }
+
+    /// Average load of one core type, 0...1.
+    func load(of type: CoreType) -> Double {
+        let loads = type.cores.compactMap { coreLoads.indices.contains($0) ? coreLoads[$0] : nil }
+        return loads.isEmpty ? 0 : loads.reduce(0, +) / Double(loads.count)
+    }
 
     private let queue = DispatchQueue(label: "smc.reader", qos: .utility)
     private var reader: SMCReader?
     private var battery: BatteryReader?
+    private let coreReader = CoreLoadReader()
+    private let gpuReader = GPULoadReader()
     private var timer: Timer?
     private var seq = 0
     private var overdrawStreak = 0 // >0: readings with a shortfall in a row, <0: without
@@ -167,10 +184,12 @@ final class SensorMonitor: ObservableObject {
         queue.async { [weak self] in
             let reader = SMCReader()
             let battery = BatteryReader()
+            let topology = CPUTopology.read()
             DispatchQueue.main.async {
                 guard let self else { return }
                 self.reader = reader
                 self.battery = battery
+                self.topology = topology
                 self.ready = reader.available
                 self.poll()
                 self.schedule()
@@ -200,11 +219,13 @@ final class SensorMonitor: ObservableObject {
 
     private func poll() {
         guard let reader, let battery, reader.available else { return }
+        let coreReader = coreReader, gpuReader = gpuReader
         queue.async {
             let cpu = reader.group(reader.cpuKeys)
             let gpu = reader.group(reader.gpuKeys)
             var snap = Snapshot(cpuAvg: cpu.avg, cpuMax: cpu.max, gpuAvg: gpu.avg, gpuMax: gpu.max,
-                                fans: reader.fans(), power: reader.power(battery))
+                                fans: reader.fans(), power: reader.power(battery),
+                                coreLoads: coreReader.read(), gpuLoad: gpuReader.read())
             DispatchQueue.main.async {
                 let deficit = snap.power.deficit
                 if deficit != nil {
@@ -218,7 +239,9 @@ final class SensorMonitor: ObservableObject {
                 self.current = snap
                 self.seq += 1
                 self.history.append(Sample(id: self.seq, date: Date(), cpu: cpu.max, gpu: gpu.max,
-                                           rpm: self.averageRPM, power: snap.power.system ?? 0))
+                                           rpm: self.averageRPM, power: snap.power.system ?? 0,
+                                           typeLoads: self.topology.types.map(self.load(of:)),
+                                           gpuLoad: snap.gpuLoad))
                 if self.history.count > Self.historyLength {
                     self.history.removeFirst(self.history.count - Self.historyLength)
                 }

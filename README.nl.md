@@ -33,6 +33,7 @@ Het begon met een simpele vraag — *"waarom $10 betalen voor een fan-app als we
 - **Bestand tegen slaapstand en herstarts**: instellingen worden elke ronde opnieuw gezet, en de fans gaan altijd terug naar macOS als de dienst stopt.
 
 **Monitoring**
+- **Belasting per kern**, gegroepeerd per type en cluster — Super-, prestatie- en efficiëntiekernen, wat je chip ook heeft — plus GPU-gebruik en een grafiek van de belasting. De indeling komt rechtstreeks van macOS, dus het past op elke M-chip, van M1 tot Ultra.
 - CPU- en GPU-temperaturen (heetste en gemiddelde over ~100 sensoren op de chip), beide fans, en 5 minuten geschiedenis in grafieken.
 - **Stroom**: totaal systeemverbruik, wat de adapter levert, het adaptervermogen, batterijpercentage en laad- of ontlaadvermogen.
 - **Waarschuwing bij een tekort**: een ⚡︎⚠︎-icoon plus het tekort (bijv. `−16 W`) in de menubalk als je Mac meer trekt dan de adapter kan leveren.
