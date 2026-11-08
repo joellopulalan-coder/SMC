@@ -30,6 +30,9 @@ struct DashboardView: View {
                 Panel(tr("Load"), symbol: "cpu") {
                     CoreLoadSection()
                 }
+                Panel(tr("Activity"), symbol: "list.bullet.rectangle") {
+                    ActivitySection()
+                }
                 Panel(tr("Temperature"), symbol: "thermometer.medium") {
                     TemperatureChart()
                 }
@@ -276,6 +279,117 @@ private struct CoreLoadSection: View {
     }
 }
 
+private struct ActivitySection: View {
+    @EnvironmentObject private var monitor: SensorMonitor
+    @AppStorage("activitySort") private var sort = "cpu"
+
+    private var rows: [ProcessGroup] {
+        let list = monitor.processes
+        let sorted: [ProcessGroup]
+        switch sort {
+        case "energy": sorted = list.sorted { $0.watts > $1.watts }
+        case "gpu": sorted = list.sorted { ($0.usingGPU ? 1 : 0, $0.cpu) > ($1.usingGPU ? 1 : 0, $1.cpu) }
+        default: sorted = list.sorted { $0.cpu > $1.cpu }
+        }
+        return Array(sorted.prefix(10))
+    }
+
+    var body: some View {
+        let rows = rows
+        let scale = max(rows.map { sort == "energy" ? $0.watts : $0.cpu }.max() ?? 1, 0.001)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(tr("Which apps and processes the load comes from right now."))
+                    .font(.callout).foregroundStyle(.secondary)
+                Spacer()
+                EqualSegmentedPicker(selection: $sort, options: [("cpu", "CPU"), ("energy", tr("Power")), ("gpu", "GPU")],
+                                     enabled: true)
+                    .frame(width: 220)
+            }
+
+            if rows.isEmpty {
+                Text(tr("Measuring…")).font(.callout).foregroundStyle(.secondary)
+            } else {
+                Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 6) {
+                    GridRow {
+                        Text(tr("Name"))
+                        Text(verbatim: "")
+                        Text(verbatim: "CPU").gridColumnAlignment(.trailing)
+                        Text(tr("Power")).gridColumnAlignment(.trailing)
+                        Text(verbatim: "GPU").gridColumnAlignment(.center)
+                    }
+                    .font(.caption).foregroundStyle(.secondary)
+                    Divider().gridCellUnsizedAxes(.horizontal)
+
+                    ForEach(rows) { g in
+                        GridRow {
+                            HStack(spacing: 8) {
+                                Image(nsImage: AppIcons.icon(for: g.bundlePath)).resizable().frame(width: 16, height: 16)
+                                Text(g.name).lineLimit(1).truncationMode(.middle)
+                                if g.processCount > 1 {
+                                    Text(verbatim: "\(g.processCount)").font(.caption2).foregroundStyle(.secondary)
+                                        .help(tr("%@ processes", "\(g.processCount)"))
+                                }
+                            }
+                            ShareBar(fraction: (sort == "energy" ? g.watts : g.cpu) / scale)
+                                .frame(width: 90)
+                            Text(verbatim: formatCPU(g.cpu)).monospacedDigit()
+                            Text(formatWatts(g.watts)).monospacedDigit()
+                            Group {
+                                if g.usingGPU {
+                                    Image(systemName: "square.stack.3d.up.fill").foregroundStyle(.purple)
+                                        .help(tr("Sent work to the GPU in the last seconds"))
+                                } else {
+                                    Text(verbatim: "")
+                                }
+                            }
+                            .gridColumnAlignment(.center)
+                        }
+                        .font(.callout)
+                    }
+
+                    if monitor.otherCPU >= 0.5 {
+                        GridRow {
+                            HStack(spacing: 8) {
+                                Image(systemName: "ellipsis.circle").frame(width: 16, height: 16).foregroundStyle(.secondary)
+                                Text(tr("Other system processes")).foregroundStyle(.secondary)
+                            }
+                            Text(verbatim: "")
+                            Text(verbatim: formatCPU(monitor.otherCPU)).monospacedDigit().foregroundStyle(.secondary)
+                            Text(verbatim: "–").foregroundStyle(.secondary)
+                            Text(verbatim: "")
+                        }
+                        .font(.callout)
+                    }
+                }
+            }
+
+            Text(tr("CPU: 100%% is one full core (%@ cores in total). Power is the energy macOS attributes to each process. GPU marks apps that sent work to the GPU in the last seconds; macOS doesn't report a reliable GPU percentage per app. Processes of other users and the system can only be read as a total.", "\(monitor.topology.cpuCount)"))
+                .font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func formatCPU(_ v: Double) -> String {
+        v < 10 ? v.formatted(.number.precision(.fractionLength(1))) + "%" : "\(Int(v.rounded()))%"
+    }
+}
+
+private struct ShareBar: View {
+    let fraction: Double
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 2).fill(Color.accentColor.opacity(0.15))
+                RoundedRectangle(cornerRadius: 2).fill(Color.accentColor)
+                    .frame(width: geo.size.width * min(max(fraction, 0), 1))
+            }
+        }
+        .frame(height: 6)
+    }
+}
+
 private struct CoreTypeRow: View {
     let type: CoreType
     let loads: [Double]
@@ -341,6 +455,10 @@ private struct GPULoadRow: View {
                 }
             }
             .frame(height: 12)
+            // The driver reports the share of time the GPU had work, not how much of its capacity is used.
+            Text(tr("Share of time the GPU had work, not how much of its power is used: at light load it runs at a low clock, so even drawing the desktop on large or high-refresh displays can keep it busy most of the time."))
+                .font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }

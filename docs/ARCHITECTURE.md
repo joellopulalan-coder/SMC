@@ -76,6 +76,7 @@ The app writes it atomically (write to a temporary file, then rename), so the da
 | `SensorMonitor.swift` | Reads SMC sensors and battery data on a background queue and publishes one snapshot per cycle |
 | `SettingsStore.swift` | Profiles, curves, and writing the config file |
 | `CoreLoad.swift` | CPU topology (core types and clusters), per-core load and GPU utilization |
+| `ProcessMonitor.swift` | Per-process CPU and energy, grouped per app, and which apps use the GPU |
 | `HelperManager.swift` | Installs/updates/removes the daemon and detects whether it runs (by testing its lock) |
 | `StressTest.swift` | CPU and GPU load, scores, results |
 | `DashboardView.swift` | The dashboard |
@@ -110,6 +111,19 @@ On the 14" M5 Max this yields 6 Super cores (cpu12–17, cluster type `P`) and 1
 **Per-core load** comes from `host_processor_info(PROCESSOR_CPU_LOAD_INFO)`: one Mach call returns user/system/idle/nice tick counters for every logical CPU, and load is the non-idle share of the ticks since the previous reading. The processor index equals the `logical-cpu-id`. **GPU utilization** is `Device Utilization %` from the `IOAccelerator` service's `PerformanceStatistics`; the core count is its `gpu-core-count` property.
 
 Both are read on the sensor queue in the same cycle as the temperatures, so they add no timers or wake-ups.
+
+### Activity (per-process load)
+
+`ProcessSampler` runs on the sensor queue, **only while the dashboard is visible**:
+
+1. `proc_listallpids` lists every process; `proc_pid_rusage(RUSAGE_INFO_V6)` gives each one's user + system CPU time (Mach ticks, converted with `mach_timebase_info`) and `ri_energy_nj`. The deltas since the previous reading give CPU % (100% = one core) and watts. One pass over ~900 processes takes 1–2 ms.
+2. Without root, `proc_pid_rusage` only works for processes of the same user — about 600 of 900 on a typical Mac. The CPU of the rest is reported as *other system processes*: the sum of the per-core loads minus everything that could be read. (`ps` can see everything because it is setuid root.)
+3. Processes are grouped by the **outermost `.app` bundle** in their executable path, so an app's helpers add up under the app; other processes are grouped per executable. Names and paths are cached per pid and start time.
+4. **GPU**: every GPU client (`AGXDeviceUserClient`, found by walking the `IOAccelerator` service's children — they can't be matched directly) carries `IOUserClientCreator` (`pid N, name`) and `AppUsage` entries with `lastSubmittedTime` and `accumulatedGPUTime`. Only `lastSubmittedTime` is used, to mark apps that submitted work since the previous reading. `accumulatedGPUTime` was tested and rejected: for a Metal compute loop that Metal's own timestamps showed using ~1,050 ms of GPU time per second, it grew by only ~20 ms per second. The kernel's `task_power_info_v2.gpu_energy.task_gpu_utilisation` stayed at 0 on Apple Silicon.
+
+### Menu bar sparklines
+
+The CPU and GPU sparklines are drawn from the last 16 readings in the history (about 80 s with only the menu bar visible). The fan icon and the graphs are drawn into **one template image** (`MenuBarIcon`) next to the text, because a menu bar label renders an `Image` plus a `Text` reliably; template images are tinted by macOS for light and dark menu bars. Bar heights are quantized to whole points, so the label's `Equatable` check skips redraws when nothing visibly changed.
 
 ### Stress test
 

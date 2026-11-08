@@ -116,6 +116,20 @@
 "%@-core GPU" = "%@-kern GPU";
 "CPU load" = "CPU-belasting";
 "GPU load" = "GPU-belasting";
+"Share of time the GPU had work, not how much of its power is used: at light load it runs at a low clock, so even drawing the desktop on large or high-refresh displays can keep it busy most of the time." = "Het deel van de tijd dat de GPU werk had, niet hoeveel van zijn vermogen wordt gebruikt: bij lichte belasting draait hij op een lage kloksnelheid, dus zelfs het bureaublad tekenen op grote schermen of schermen met een hoge verversingssnelheid kan hem het grootste deel van de tijd bezig houden.";
+
+/* Activity */
+"Activity" = "Activiteit";
+"Which apps and processes the load comes from right now." = "Van welke apps en processen de belasting nu komt.";
+"Measuring…" = "Bezig met meten…";
+"Name" = "Naam";
+"%@ processes" = "%@ processen";
+"Sent work to the GPU in the last seconds" = "Stuurde de afgelopen seconden werk naar de GPU";
+"Other system processes" = "Overige systeemprocessen";
+"CPU: 100%% is one full core (%@ cores in total). Power is the energy macOS attributes to each process. GPU marks apps that sent work to the GPU in the last seconds; macOS doesn't report a reliable GPU percentage per app. Processes of other users and the system can only be read as a total." = "CPU: 100%% is één volledige kern (%@ kernen in totaal). Stroom is de energie die macOS aan elk proces toeschrijft. GPU markeert apps die de afgelopen seconden werk naar de GPU stuurden; macOS geeft geen betrouwbaar GPU-percentage per app. Processen van andere gebruikers en het systeem zijn alleen als totaal te lezen.";
+"CPU graph" = "CPU-grafiek";
+"GPU graph" = "GPU-grafiek";
+"mini chart of the last minute or so" = "minigrafiek van ongeveer de laatste minuut";
 
 /* Fan curve */
 "now %@" = "nu %@";
