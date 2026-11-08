@@ -43,6 +43,7 @@ struct Sample: Identifiable {
     let rpm: Double
     let power: Double
     let typeLoads: [Double] // average load per core type, same order as CPUTopology.types
+    let cpuLoad: Double     // average over all cores, 0...1
     let gpuLoad: Double?
 }
 
@@ -142,6 +143,10 @@ final class SensorMonitor: ObservableObject {
         var overdraw: Double?
         var coreLoads: [Double] = [] // per logical CPU, 0...1
         var gpuLoad: Double?
+        /// Only filled while the dashboard is visible.
+        var processes: [ProcessGroup] = []
+        /// CPU (percent of one core) used by processes this app can't inspect.
+        var otherCPU: Double = 0
     }
 
     // One published value per reading, so views redraw only once per round.
@@ -161,6 +166,8 @@ final class SensorMonitor: ObservableObject {
     var anyManual: Bool { fans.contains { $0.manual } }
     var averageRPM: Double { fans.isEmpty ? 0 : fans.map(\.rpm).reduce(0, +) / Double(fans.count) }
     var coreLoads: [Double] { current.coreLoads }
+    var processes: [ProcessGroup] { current.processes }
+    var otherCPU: Double { current.otherCPU }
     var gpuLoad: Double? { current.gpuLoad }
     /// Average load of all CPU cores, 0...1.
     var cpuLoad: Double { coreLoads.isEmpty ? 0 : coreLoads.reduce(0, +) / Double(coreLoads.count) }
@@ -176,6 +183,7 @@ final class SensorMonitor: ObservableObject {
     private var battery: BatteryReader?
     private let coreReader = CoreLoadReader()
     private let gpuReader = GPULoadReader()
+    private let processSampler = ProcessSampler()
     private var timer: Timer?
     private var seq = 0
     private var overdrawStreak = 0 // >0: readings with a shortfall in a row, <0: without
@@ -219,13 +227,19 @@ final class SensorMonitor: ObservableObject {
 
     private func poll() {
         guard let reader, let battery, reader.available else { return }
-        let coreReader = coreReader, gpuReader = gpuReader
+        let coreReader = coreReader, gpuReader = gpuReader, processSampler = processSampler
+        let wantProcesses = dashboardVisible
         queue.async {
             let cpu = reader.group(reader.cpuKeys)
             let gpu = reader.group(reader.gpuKeys)
             var snap = Snapshot(cpuAvg: cpu.avg, cpuMax: cpu.max, gpuAvg: gpu.avg, gpuMax: gpu.max,
                                 fans: reader.fans(), power: reader.power(battery),
                                 coreLoads: coreReader.read(), gpuLoad: gpuReader.read())
+            if wantProcesses {
+                let sample = processSampler.sample()
+                snap.processes = sample.groups
+                snap.otherCPU = max(0, snap.coreLoads.reduce(0, +) * 100 - sample.readableCPU)
+            }
             DispatchQueue.main.async {
                 let deficit = snap.power.deficit
                 if deficit != nil {
@@ -241,7 +255,7 @@ final class SensorMonitor: ObservableObject {
                 self.history.append(Sample(id: self.seq, date: Date(), cpu: cpu.max, gpu: gpu.max,
                                            rpm: self.averageRPM, power: snap.power.system ?? 0,
                                            typeLoads: self.topology.types.map(self.load(of:)),
-                                           gpuLoad: snap.gpuLoad))
+                                           cpuLoad: self.cpuLoad, gpuLoad: snap.gpuLoad))
                 if self.history.count > Self.historyLength {
                     self.history.removeFirst(self.history.count - Self.historyLength)
                 }

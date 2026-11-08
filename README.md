@@ -59,12 +59,13 @@ It was born out of a simple question — *"why pay $10 for a fan app when we can
 
 **Monitoring**
 - **Per-core load**, grouped by core type and cluster — Super, Performance and Efficiency cores, whatever your chip has — plus GPU utilization and a load-history chart. The layout is read from macOS, so it fits every M-series chip from M1 to Ultra.
+- **Activity**: which apps and processes the load comes from — CPU per app (helpers grouped under their app, like Activity Monitor), the energy macOS attributes to each, and which apps are using the GPU right now.
 - CPU and GPU temperatures (hottest and average across ~100 on-die sensors), both fans, and 5 minutes of history on charts.
 - **Power**: total system power, adapter input, adapter rating, battery percentage and charge/discharge rate.
 - **Adapter shortfall warning**: a ⚡︎⚠︎ icon plus the deficit (e.g. `−16 W`) in the menu bar when your Mac draws more than the adapter can deliver and the battery has to help out.
 
 **Menu bar**
-- Pick what's shown next to the icon: temperature, fan speed, CPU load, GPU load, profile icon, power draw, charging/discharging and battery percentage — for example `48° · 2.4k rpm · CPU 23% · 15 W · AC`.
+- Pick what's shown next to the icon: temperature, fan speed, CPU load, GPU load, **CPU and GPU sparklines**, profile icon, power draw, charging/discharging and battery percentage — for example `48° · 2.4k rpm · CPU 23% · 15 W · AC`.
 - A compact panel with temperatures, a per-core load strip, fans, power and a one-click profile switcher.
 
 **Stress test & benchmark**
@@ -155,6 +156,17 @@ Which core types you see depends on your chip:
 
 SMC Fan doesn't hard-code any of this: it reads the core types from macOS (`hw.perflevelN`) and maps each core to its type and cluster through the device tree, so new chips work without an update.
 
+### Activity
+
+The **Activity** block lists the apps and processes using the most CPU right now, sorted by CPU, power or GPU:
+
+- **CPU** follows Activity Monitor's convention: 100% is one full core. An app's helper processes are added up under the app (Chrome's dozens of helpers become one "Google Chrome" row), and several copies of the same program form one row.
+- **Power** is the energy macOS attributes to each process (`ri_energy_nj`).
+- **GPU** marks apps that sent work to the GPU in the last few seconds. macOS doesn't expose a reliable GPU percentage per app to normal apps — the GPU driver's own per-app counters reported ~2% for a process that measurably kept the GPU 100% busy — so SMC Fan shows *who* is using the GPU, not *how much*.
+- **Other system processes**: without root, an app can only inspect processes of its own user (about two thirds on a typical Mac). The CPU used by the rest — WindowServer, kernel_task, system daemons — is shown as one row: total CPU minus everything listed.
+
+The list is only measured while the dashboard is visible, so it costs nothing when you're not looking.
+
 ### Menu bar
 
 Choose what appears next to the icon in **Dashboard → Menu bar**. The icon itself tells you what's going on:
@@ -163,6 +175,7 @@ Choose what appears next to the icon in **Dashboard → Menu bar**. The icon its
 |---|---|
 | fan (outline) | macOS controls the fans |
 | fan (filled) | SMC Fan controls the fans |
+| fan + bar graphs | CPU and/or GPU sparkline: the load over roughly the last minute (16 readings) |
 | profile icon | you chose to show the active profile |
 | 🔥 flame | a stress test is running |
 | ⚡︎⚠︎ bolt with warning | the adapter can't keep up and the battery is helping out |

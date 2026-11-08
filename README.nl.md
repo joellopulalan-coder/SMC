@@ -34,6 +34,8 @@ Het begon met een simpele vraag — *"waarom $10 betalen voor een fan-app als we
 
 **Monitoring**
 - **Belasting per kern**, gegroepeerd per type en cluster — Super-, prestatie- en efficiëntiekernen, wat je chip ook heeft — plus GPU-gebruik en een grafiek van de belasting. De indeling komt rechtstreeks van macOS, dus het past op elke M-chip, van M1 tot Ultra.
+- **Activiteit**: van welke apps en processen de belasting komt — CPU per app (helpers onder hun app gegroepeerd, zoals in Activiteitenweergave), het stroomverbruik per app, en welke apps nu de GPU gebruiken.
+- **Sparklines** in de menubalk: een minigrafiek van de CPU- en/of GPU-belasting van ongeveer de laatste minuut.
 - CPU- en GPU-temperaturen (heetste en gemiddelde over ~100 sensoren op de chip), beide fans, en 5 minuten geschiedenis in grafieken.
 - **Stroom**: totaal systeemverbruik, wat de adapter levert, het adaptervermogen, batterijpercentage en laad- of ontlaadvermogen.
 - **Waarschuwing bij een tekort**: een ⚡︎⚠︎-icoon plus het tekort (bijv. `−16 W`) in de menubalk als je Mac meer trekt dan de adapter kan leveren.

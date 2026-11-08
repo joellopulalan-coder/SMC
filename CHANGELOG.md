@@ -4,6 +4,14 @@ All notable changes to SMC Fan are listed here. The format follows [Keep a Chang
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-08
+
+### Added
+
+- Activity list in the dashboard: which apps and processes the CPU load comes from, with power per app and a marker for apps using the GPU; sortable by CPU, power or GPU. Helper processes are grouped under their app, and copies of the same program form one row.
+- "Other system processes" row for the CPU used by processes that can't be inspected without root.
+- CPU and GPU sparklines in the menu bar.
+
 ## [1.1.0] - 2026-11-02
 
 ### Added
@@ -41,7 +49,8 @@ The first public release.
 
 - About 1% CPU and 50 MB with only the menu bar visible; the background service uses about 0.2% CPU and under 2 MB.
 
-[Unreleased]: https://github.com/joellopulalan-coder/SMC/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/joellopulalan-coder/SMC/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/joellopulalan-coder/SMC/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/joellopulalan-coder/SMC/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/joellopulalan-coder/SMC/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/joellopulalan-coder/SMC/releases/tag/v1.0.0
