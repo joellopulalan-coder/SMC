@@ -12,6 +12,10 @@ All notable changes to SMC Fan are listed here. The format follows [Keep a Chang
 - "Other system processes" row for the CPU used by processes that can't be inspected without root.
 - CPU and GPU sparklines in the menu bar.
 
+### Changed
+
+- The GPU row explains that the driver's figure is the share of time the GPU had work, not how much of its power is used. On a 6K 120 Hz display, drawing the desktop alone keeps it "busy" ~70% of the time at low power.
+
 ## [1.1.0] - 2026-11-02
 
 ### Added

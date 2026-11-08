@@ -116,6 +116,7 @@
 "%@-core GPU" = "%@-kern GPU";
 "CPU load" = "CPU-belasting";
 "GPU load" = "GPU-belasting";
+"Share of time the GPU had work, not how much of its power is used: at light load it runs at a low clock, so even drawing the desktop on large or high-refresh displays can keep it busy most of the time." = "Het deel van de tijd dat de GPU werk had, niet hoeveel van zijn vermogen wordt gebruikt: bij lichte belasting draait hij op een lage kloksnelheid, dus zelfs het bureaublad tekenen op grote schermen of schermen met een hoge verversingssnelheid kan hem het grootste deel van de tijd bezig houden.";
 
 /* Activity */
 "Activity" = "Activiteit";

@@ -455,6 +455,10 @@ private struct GPULoadRow: View {
                 }
             }
             .frame(height: 12)
+            // The driver reports the share of time the GPU had work, not how much of its capacity is used.
+            Text(tr("Share of time the GPU had work, not how much of its power is used: at light load it runs at a low clock, so even drawing the desktop on large or high-refresh displays can keep it busy most of the time."))
+                .font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
